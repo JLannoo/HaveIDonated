@@ -1,0 +1,10 @@
+{
+  "Name": "HaveIDonated",
+  "Author": "DarkDiosito",
+  "Version": "1.0.0",
+  "Description": "It shows you if you have donated an item to the Community Center or Museum.",
+  "UniqueID": "DarkDiosito.HaveIDonated",
+  "EntryDll": "HaveIDonated.dll",
+  "MinimumApiVersion": "3.0.0",
+  "UpdateKeys": []
+}
