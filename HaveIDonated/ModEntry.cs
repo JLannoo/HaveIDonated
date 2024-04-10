@@ -1,22 +1,33 @@
-﻿using System;
-using Microsoft.Xna.Framework;
-using StardewModdingAPI;
+﻿using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
-using StardewValley;
 
-namespace HaveIDonated {
-    internal class ModEntry: Mod {
-        /// <summary>
-        /// Executed when mod is first loaded
-        /// </summary>
-        public override void Entry(IModHelper helper) {
+namespace HaveIDonated;
 
-        }
+public class ModEntry: Mod {
+    private IModHelper _helper;
+    private Hover hover;
 
-        /// <summary>
-        /// Mod's private methods
-        /// </summary>
-        
+    public static IMonitor MonitorObject;
+
+    /// <summary>
+    /// Executed when mod is first loaded
+    /// </summary>
+    public override void Entry(IModHelper helper) {
+        MonitorObject = Monitor;
+        _helper = helper;
+        helper.Events.GameLoop.DayStarted += onDayStarted;
+        helper.Events.Player.InventoryChanged += onInventoryChanged;
     }
+
+    #region Events
+    private void onDayStarted(object? sender, DayStartedEventArgs e) {
+        hover?.Dispose();
+        hover = new Hover(_helper);
+    }
+
+    private void onInventoryChanged(object? sender, InventoryChangedEventArgs e) {
+        hover?.Dispose();
+        hover = new Hover(_helper);
+    }
+    #endregion
 }
