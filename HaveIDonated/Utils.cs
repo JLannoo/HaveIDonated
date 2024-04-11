@@ -65,6 +65,8 @@ public static class Utils {
             }
 
             string roomName = data[0];
+            int areaNumber = CommunityCenter.getAreaNumberFromName(roomName);
+            string areaName = CommunityCenter.getAreaDisplayNameFromNumber(areaNumber);
 
             int bundleId;
             var parsedBundleId = int.TryParse(data[1], out bundleId);
@@ -112,11 +114,11 @@ public static class Utils {
             }
 
             string? translatedName = null;
-            if (data.Length > 7 && data[7] != "") {
-                translatedName = data[7];
+            if (data.Length > 7 && data[^1] != "") {
+                translatedName = data[^1];
             }
 
-            bundles.Add(new Bundle(roomName, bundleName, bundleId, bundleReward, translatedName, itemList, itemQuantityRequired));
+            bundles.Add(new Bundle(areaName, bundleName, bundleId, bundleReward, translatedName, itemList, itemQuantityRequired));
         }
 
         ModEntry.MonitorObject.Log($"Initialized CC Bundle with {bundles.Count} bundles and {bundles.Count(bundle => !bundle.completed)} incomplete", StardewModdingAPI.LogLevel.Info);
@@ -173,7 +175,7 @@ public class Bundle {
             }
         }
 
-        if(missingItems.Count == 0) {
+        if(requiredItems.Count - missingItems.Count > requiredQuantity) {
             completed = true;
         }
 

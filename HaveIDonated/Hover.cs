@@ -4,8 +4,6 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Locations;
-using StardewValley.Menus;
-using Microsoft.Xna.Framework;
 
 namespace HaveIDonated;
 
@@ -79,39 +77,9 @@ public class Hover : IDisposable {
 			}
 
 			if(_donatableToMuseum) {
-				Utils.drawTooltip(spriteBatch, "Donate to Gunther");
+				Utils.drawTooltip(spriteBatch, Game1.getLocationFromName("ArchaeologyHouse").DisplayName);
 			}
         }
-	}
-
-	private void DrawMuseumTooltip(SpriteBatch spriteBatch) {
-		spriteBatch.Draw(
-			Game1.menuTexture,
-			new Rectangle(0,0,Game1.tileSize,Game1.tileSize),
-			Color.Black
-		);
-
-		spriteBatch.DrawString(
-			Game1.dialogueFont,
-			"M",
-			new Vector2(0, 0),
-			Color.White
-		);
-	}
-
-	private void DrawCommunityCenterTooltip(SpriteBatch spriteBatch) {
-		spriteBatch.Draw(
-			Game1.menuTexture,
-			new Rectangle(0, 0, Game1.tileSize, Game1.tileSize),
-			Color.Black
-		);
-
-		spriteBatch.DrawString(
-			Game1.dialogueFont,
-			"CC",
-			new Vector2(0,0),
-			Color.White
-		);
 	}
 	#endregion
 }
