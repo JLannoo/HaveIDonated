@@ -35,14 +35,24 @@ public static class Utils {
     public static Item? GetHoveredItem() {
         Item? hoverItem = null;
 
+        // Toolbar 
         if (Game1.activeClickableMenu == null && Game1.onScreenMenus != null) {
             hoverItem = Game1.onScreenMenus.OfType<Toolbar>().Select(tb => tb.hoverItem).FirstOrDefault(hi => hi is not null);
         }
 
-        if (Game1.activeClickableMenu is GameMenu gameMenu && gameMenu.GetCurrentPage() is InventoryPage inventory) {
-            hoverItem = inventory.hoveredItem;
+        // Menu pages
+        if (Game1.activeClickableMenu is GameMenu gameMenu) {
+            switch (gameMenu.GetCurrentPage()) {
+                case InventoryPage inventory:
+                    hoverItem = inventory.hoveredItem;
+                    break;
+                case CraftingPage crafting:
+                    hoverItem = crafting.hoverItem;
+                    break;
+            }
         }
 
+        // Chest Menu
         if (Game1.activeClickableMenu is ItemGrabMenu itemMenu) {
             hoverItem = itemMenu.hoveredItem;
         }
