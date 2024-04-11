@@ -1,9 +1,11 @@
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Locations;
+using StardewValley.Menus;
 
 namespace HaveIDonated;
 
@@ -70,14 +72,27 @@ public class Hover : IDisposable {
 				}
 			}
 
-			ModEntry.MonitorObject.LogOnce($"{obj.displayName}: CC {_donatableToCenter} - M {_donatableToMuseum}", LogLevel.Info);
+			ModEntry.MonitorObject.LogOnce($"CC [{(_donatableToCenter ? "X" : " ")}] M [{(_donatableToMuseum ? "X" : " ")}] - {obj.displayName}", LogLevel.Info);
 
 			if(_donatableToCenter) {
-				Utils.drawTooltip(spriteBatch, $"{_bundleDonatable.roomName} - {_bundleDonatable.displayName}");
+				var icon = Utils.getBundleIcon(_bundleDonatable.bundleColor);
+				Utils.drawTooltip(spriteBatch, $"{_bundleDonatable.roomName} - {_bundleDonatable.displayName}", icon);
 			}
 
 			if(_donatableToMuseum) {
-				Utils.drawTooltip(spriteBatch, Game1.getLocationFromName("ArchaeologyHouse").DisplayName);
+				var gunther = Game1.getCharacterFromName("Gunther");
+				if (gunther == null) {
+					throw new Exception("Could not find Gunther");
+				}
+
+				var icon = new ClickableTextureComponent(
+					new Rectangle(0, 0, Game1.tileSize, Game1.tileSize),
+					gunther.Sprite.Texture,
+                    gunther.getMugShotSourceRect(),
+					Game1.pixelZoom
+				);
+				
+				Utils.drawTooltip(spriteBatch, Game1.getLocationFromName("ArchaeologyHouse").DisplayName, icon);
 			}
         }
 	}

@@ -7,15 +7,19 @@ using StardewValley.Menus;
 namespace HaveIDonated;
 
 public static class Utils {
-    public static void drawTooltip(SpriteBatch spriteBatch, string text) {
+    public static void drawTooltip(SpriteBatch spriteBatch, string text, ClickableTextureComponent? icon = null) {
         var textBoundsSize = Game1.smallFont.MeasureString(text);
         var mousePosition = Game1.getMousePosition().ToVector2();
 
-        int padding = 30;
-        var windowSize = new Vector2(textBoundsSize.X + padding, textBoundsSize.Y + padding);
+        int padding = 15;
+
+        var windowSize = new Vector2(textBoundsSize.X + padding*2, textBoundsSize.Y + padding*2);
+        if(icon != null) {
+            windowSize += new Vector2(icon.sourceRect.Width + 25, 0);
+        }
         var displacement = new Vector2(-32-windowSize.X, 32);
 
-        var position = new Vector2(mousePosition.X + displacement.X, Math.Min(mousePosition.Y + displacement.Y, Game1.options.preferredResolutionY - windowSize.Y));
+        var position = new Vector2(mousePosition.X + displacement.X, Math.Min(mousePosition.Y + displacement.Y, Game1.viewport.Height - windowSize.Y));
 
         IClickableMenu.drawTextureBox(
             spriteBatch,
@@ -26,10 +30,28 @@ public static class Utils {
             Color.White
         );
 
-        var finalTextPosition = position + new Vector2(padding/2, padding/2);
+        var textPosition = position + new Vector2(padding, padding);
+        if(icon != null) {
+            textPosition += new Vector2(icon.sourceRect.Width + 20, 0);
+        }
 
-        spriteBatch.DrawString(Game1.smallFont, text, finalTextPosition + new Vector2(2, 2), Game1.textShadowColor);
-        spriteBatch.DrawString(Game1.smallFont, text, finalTextPosition, Game1.textColor);
+        if(icon != null) {
+            var iconPosition = position + new Vector2(padding, windowSize.Y / 2 - icon.sourceRect.Height);
+            spriteBatch.Draw(
+                icon.texture,
+                iconPosition,
+                icon.sourceRect,
+                Color.White,
+                0,
+                Vector2.Zero,
+                2f,
+                SpriteEffects.None,
+                1
+            );
+        }
+
+        spriteBatch.DrawString(Game1.smallFont, text, textPosition + new Vector2(2, 2), Game1.textShadowColor);
+        spriteBatch.DrawString(Game1.smallFont, text, textPosition, Game1.textColor);
     }
 
     public static Item? GetHoveredItem() {
@@ -128,12 +150,36 @@ public static class Utils {
                 translatedName = data[^1];
             }
 
-            bundles.Add(new Bundle(areaName, bundleName, bundleId, bundleReward, translatedName, itemList, itemQuantityRequired));
+            bundles.Add(new Bundle(areaName, bundleName, bundleId, bundleReward, translatedName, itemList, itemQuantityRequired, bundleColor));
         }
 
         ModEntry.MonitorObject.Log($"Initialized CC Bundle with {bundles.Count} bundles and {bundles.Count(bundle => !bundle.completed)} incomplete", StardewModdingAPI.LogLevel.Info);
 
         return bundles;
+    }
+
+    public static ClickableTextureComponent getBundleIcon(int colorId) {
+        if(colorId > 6) {
+            throw new Exception($"Invalid colorId {colorId}");
+        }
+
+        var texture = Game1.content.Load<Texture2D>("LooseSprites/JunimoNote");
+        if (texture == null) {
+            throw new Exception("Could not find Bundle textures");
+        }
+
+        var initialCoords = new Vector2(16, 244);
+        var spriteSize = 16;
+
+        var bundleCoordinate = new Vector2(colorId % 2, (float)Math.Floor(colorId / 2f));
+        var rect = new Rectangle((int)(initialCoords.X + bundleCoordinate.X * 256), (int)(initialCoords.Y + bundleCoordinate.Y * 16), spriteSize, spriteSize);
+
+        return new ClickableTextureComponent(
+            new Rectangle(0,0,Game1.tileSize,Game1.tileSize),
+            texture,
+            rect,
+            1
+        );
     }
 }
 
@@ -163,12 +209,13 @@ public class Bundle {
     public string? translatedName;
     public List<Item> requiredItems;
     public int requiredQuantity;
+    public int bundleColor;
 
     public List<Item> missingItems = new();
     public bool completed = false;
     public string displayName;
 
-    public Bundle(string roomName, string name, int bundleId, BundleReward? reward, string? translatedName, List<Item> requiredItems, int requiredQuantity) {
+    public Bundle(string roomName, string name, int bundleId, BundleReward? reward, string? translatedName, List<Item> requiredItems, int requiredQuantity, int bundleColor) {
         this.roomName = roomName;
         this.name = name;
         this.bundleId = bundleId;
@@ -176,6 +223,7 @@ public class Bundle {
         this.translatedName = translatedName;
         this.requiredItems = requiredItems;
         this.requiredQuantity = requiredQuantity;
+        this.bundleColor = bundleColor;
 
         if (Game1.getLocationFromName("CommunityCenter") is CommunityCenter cCenter) {
             for (int i = 0; i < requiredItems.Count; i++) {
@@ -185,7 +233,7 @@ public class Bundle {
             }
         }
 
-        if(requiredItems.Count - missingItems.Count > requiredQuantity) {
+        if (requiredItems.Count - missingItems.Count > requiredQuantity) {
             completed = true;
         }
 
