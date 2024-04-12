@@ -6,21 +6,45 @@ using StardewValley.Menus;
 
 namespace HaveIDonated;
 
+public struct Line {
+    public string text;
+    public ClickableTextureComponent? icon = null;
+
+    public Line(string text, ClickableTextureComponent? icon = null) {
+        this.text = text;
+        this.icon = icon;
+    }
+}
+
 public static class Utils {
-    public static void drawTooltip(SpriteBatch spriteBatch, string text, ClickableTextureComponent? icon = null) {
-        var textBoundsSize = Game1.smallFont.MeasureString(text);
-        var mousePosition = Game1.getMousePosition().ToVector2();
+    public static void drawTooltip(SpriteBatch spriteBatch, List<Line> lines) {
+        // Put lines with icons first
+        lines.Sort((a, b) => {
+            if(a.icon == null) return 1;
+            if(b.icon == null) return -1;
+            return 0;
+        });
+
+        var lineSizes = lines.Select(line => Game1.smallFont.MeasureString(line.text)).ToArray();
 
         int padding = 15;
 
-        var windowSize = new Vector2(textBoundsSize.X + padding*2, textBoundsSize.Y + padding*2);
-        if(icon != null) {
-            windowSize += new Vector2(icon.sourceRect.Width + 25, 0);
+        var textBoundsSize = new Vector2(lineSizes.Max(size => size.X), lineSizes[0].Y * lines.Count);
+        var mousePosition = Game1.getMousePosition().ToVector2();
+
+        var windowSize = new Vector2(textBoundsSize.X, textBoundsSize.Y);
+        windowSize += new Vector2(padding * 2);
+
+        var maxIconWidth = lines.Max(line => line.icon?.sourceRect.Width);
+        if (maxIconWidth != null) {
+            windowSize += new Vector2((int)maxIconWidth + 25, 0);
         }
+
         var displacement = new Vector2(-32-windowSize.X, 32);
 
         var position = new Vector2(mousePosition.X + displacement.X, Math.Min(mousePosition.Y + displacement.Y, Game1.viewport.Height - windowSize.Y));
 
+        // Draw window
         IClickableMenu.drawTextureBox(
             spriteBatch,
             (int)position.X,
@@ -30,28 +54,48 @@ public static class Utils {
             Color.White
         );
 
-        var textPosition = position + new Vector2(padding, padding);
-        if(icon != null) {
-            textPosition += new Vector2(icon.sourceRect.Width + 20, 0);
-        }
+        for (int i = 0; i < lines.Count; i++) {
+            Line line = lines[i];
 
-        if(icon != null) {
-            var iconPosition = position + new Vector2(padding, windowSize.Y / 2 - icon.sourceRect.Height);
-            spriteBatch.Draw(
-                icon.texture,
-                iconPosition,
-                icon.sourceRect,
-                Color.White,
-                0,
-                Vector2.Zero,
-                2f,
-                SpriteEffects.None,
+            var textPosition = position;
+            textPosition += new Vector2(padding);
+            textPosition += new Vector2(0, (i * lineSizes[i].Y));
+            
+            if(maxIconWidth != null) {
+                textPosition += new Vector2((int)maxIconWidth + 20, 0);
+            }
+
+            if (line.icon != null) {
+                var iconPosition = position;
+                iconPosition += new Vector2(padding);
+                // Add line displacement
+                iconPosition += new Vector2(0, (i * lineSizes[i].Y));
+                // Center vertically compared to text line (h*2 because of drawing scale)
+                iconPosition -= new Vector2(0, (line.icon.sourceRect.Height * 2 - lineSizes[i].Y) / 2);
+
+                // Center horizontally compared to widest icon if any
+                if(maxIconWidth != null) {
+                    iconPosition += new Vector2((line.icon.sourceRect.Width - (int)maxIconWidth) / 2, 0);
+                }
+
+                // Draw icon
+                spriteBatch.Draw(
+                    line.icon.texture,
+                    iconPosition,
+                    line.icon.sourceRect,
+                    Color.White,
+                    0,
+                    Vector2.Zero,
+                    2f,
+                    SpriteEffects.None,
                 1
-            );
-        }
+                );
+            }
 
-        spriteBatch.DrawString(Game1.smallFont, text, textPosition + new Vector2(2, 2), Game1.textShadowColor);
-        spriteBatch.DrawString(Game1.smallFont, text, textPosition, Game1.textColor);
+            // Draw text
+            spriteBatch.DrawString(Game1.smallFont, line.text, textPosition + new Vector2(2, 2), Game1.textShadowColor);
+            spriteBatch.DrawString(Game1.smallFont, line.text, textPosition, Game1.textColor);
+        }
     }
 
     public static Item? GetHoveredItem() {

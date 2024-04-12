@@ -74,9 +74,12 @@ public class Hover : IDisposable {
 
 			ModEntry.MonitorObject.LogOnce($"CC [{(_donatableToCenter ? "X" : " ")}] M [{(_donatableToMuseum ? "X" : " ")}] - {obj.displayName}", LogLevel.Info);
 
+			List<Line> lines = new();
 			if(_donatableToCenter) {
 				var icon = Utils.getBundleIcon(_bundleDonatable.bundleColor);
-				Utils.drawTooltip(spriteBatch, $"{_bundleDonatable.roomName} - {_bundleDonatable.displayName}", icon);
+				var text = $"{_bundleDonatable.roomName} - {_bundleDonatable.displayName}";
+
+				lines.Add(new Line(text, icon));
 			}
 
 			if(_donatableToMuseum) {
@@ -92,8 +95,12 @@ public class Hover : IDisposable {
 					Game1.pixelZoom
 				);
 				
-				Utils.drawTooltip(spriteBatch, Game1.getLocationFromName("ArchaeologyHouse").DisplayName, icon);
+				lines.Add(new Line(Game1.getLocationFromName("ArchaeologyHouse").DisplayName, icon));
 			}
+			
+			if(lines.Count > 0) {
+                Utils.drawTooltip(spriteBatch, lines);
+            }
         }
 	}
 	#endregion
