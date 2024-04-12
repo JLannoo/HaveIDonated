@@ -12,16 +12,16 @@ namespace HaveIDonated;
 public class Hover : IDisposable {
     private readonly IModHelper _helper;
 	private readonly PerScreen<Item?> _hoveredItem = new();
-	private readonly List<Bundle> _bundles = new List<Bundle>();
+	private readonly List<BundleData> _bundles = new List<BundleData>();
 
-	private Bundle? _bundleDonatable = null;
+	private BundleData? _bundleDonatable = null;
 
 	private bool _donatableToMuseum = false;
 	private bool _donatableToCenter = false;
 
     public Hover(IModHelper helper) {
         _helper = helper;
-		_bundles = Utils.getBundleData();
+		_bundles = Utils.GetBundleData();
 
         _helper.Events.Display.RenderingHud += OnRendering;
         _helper.Events.Display.RenderedHud += onRendered;
@@ -43,7 +43,7 @@ public class Hover : IDisposable {
     #region Events
 
     private void OnRendering(object? sender, RenderingHudEventArgs e) {
-		_hoveredItem.Value = Utils.GetHoveredItem();
+		_hoveredItem.Value = GetHoveredItem();
 	}
 
 	public void Dispose() {
@@ -63,7 +63,7 @@ public class Hover : IDisposable {
                 _donatableToMuseum = museum.isItemSuitableForDonation(obj);
             }
 
-			foreach (Bundle bundle in _bundles) {
+			foreach (BundleData bundle in _bundles) {
 				foreach (Item item in bundle.missingItems) {
 					if (obj.displayName == item.DisplayName) {
 						_donatableToCenter = true;
@@ -76,7 +76,7 @@ public class Hover : IDisposable {
 
 			List<Line> lines = new();
 			if(_donatableToCenter) {
-				var icon = Utils.getBundleIcon(_bundleDonatable.bundleColor);
+				var icon = Utils.GetBundleIcon(_bundleDonatable.bundleColor);
 				var text = $"{_bundleDonatable.roomName} - {_bundleDonatable.displayName}";
 
 				lines.Add(new Line(text, icon));
@@ -99,9 +99,41 @@ public class Hover : IDisposable {
 			}
 			
 			if(lines.Count > 0) {
-                Utils.drawTooltip(spriteBatch, lines);
+                Utils.DrawTooltip(spriteBatch, lines);
             }
         }
 	}
-	#endregion
+
+    public static Item? GetHoveredItem() {
+        Item? hoverItem = null;
+
+        // Toolbar 
+        if (Game1.activeClickableMenu == null && Game1.onScreenMenus != null) {
+            foreach (IClickableMenu menu in Game1.onScreenMenus) {
+				if(menu is Toolbar toolbar) {
+					hoverItem = toolbar.hoverItem;
+				}
+            }
+        }
+
+        // Menu pages
+        if (Game1.activeClickableMenu is GameMenu gameMenu) {
+            switch (gameMenu.GetCurrentPage()) {
+                case InventoryPage inventory:
+                    hoverItem = inventory.hoveredItem;
+                    break;
+                case CraftingPage crafting:
+                    hoverItem = crafting.hoverItem;
+                    break;
+            }
+        }
+
+        // Chest Menu
+        if (Game1.activeClickableMenu is ItemGrabMenu itemMenu) {
+            hoverItem = itemMenu.hoveredItem;
+        }
+
+        return hoverItem;
+    }
+    #endregion
 }

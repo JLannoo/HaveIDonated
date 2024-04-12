@@ -17,7 +17,7 @@ public struct Line {
 }
 
 public static class Utils {
-    public static void drawTooltip(SpriteBatch spriteBatch, List<Line> lines) {
+    public static void DrawTooltip(SpriteBatch spriteBatch, List<Line> lines) {
         // Put lines with icons first
         lines.Sort((a, b) => {
             if(a.icon == null) return 1;
@@ -98,36 +98,8 @@ public static class Utils {
         }
     }
 
-    public static Item? GetHoveredItem() {
-        Item? hoverItem = null;
-
-        // Toolbar 
-        if (Game1.activeClickableMenu == null && Game1.onScreenMenus != null) {
-            hoverItem = Game1.onScreenMenus.OfType<Toolbar>().Select(tb => tb.hoverItem).FirstOrDefault(hi => hi is not null);
-        }
-
-        // Menu pages
-        if (Game1.activeClickableMenu is GameMenu gameMenu) {
-            switch (gameMenu.GetCurrentPage()) {
-                case InventoryPage inventory:
-                    hoverItem = inventory.hoveredItem;
-                    break;
-                case CraftingPage crafting:
-                    hoverItem = crafting.hoverItem;
-                    break;
-            }
-        }
-
-        // Chest Menu
-        if (Game1.activeClickableMenu is ItemGrabMenu itemMenu) {
-            hoverItem = itemMenu.hoveredItem;
-        }
-
-        return hoverItem;
-    }
-
-    public static List<Bundle> getBundleData() {
-        var bundles = new List<Bundle>();
+    public static List<BundleData> GetBundleData() {
+        var bundles = new List<BundleData>();
         var bundleData = Game1.netWorldState?.Value?.BundleData;
 
         if(bundleData == null ) { return bundles; }
@@ -194,7 +166,7 @@ public static class Utils {
                 translatedName = data[^1];
             }
 
-            bundles.Add(new Bundle(areaName, bundleName, bundleId, bundleReward, translatedName, itemList, itemQuantityRequired, bundleColor));
+            bundles.Add(new BundleData(areaName, bundleName, bundleId, bundleReward, translatedName, itemList, itemQuantityRequired, bundleColor));
         }
 
         ModEntry.MonitorObject.Log($"Initialized CC Bundle with {bundles.Count} bundles and {bundles.Count(bundle => !bundle.completed)} incomplete", StardewModdingAPI.LogLevel.Info);
@@ -202,7 +174,7 @@ public static class Utils {
         return bundles;
     }
 
-    public static ClickableTextureComponent getBundleIcon(int colorId) {
+    public static ClickableTextureComponent GetBundleIcon(int colorId) {
         if(colorId > 6) {
             throw new Exception($"Invalid colorId {colorId}");
         }
@@ -224,63 +196,5 @@ public static class Utils {
             rect,
             1
         );
-    }
-}
-
-public class BundleReward {
-    public int quantity;
-    public Item item;
-
-    public BundleReward(string data) {
-        string[] arr = data.Split(' ');
-        
-        string type = arr[0];
-        string id = arr[1];
-        bool parsed = int.TryParse(arr[2], out quantity);
-        if(parsed){
-            item = ItemRegistry.Create(id, quantity);
-        } else {
-            throw new Exception("Could not parse Bundle Reward Quantity");
-        }
-    }
-}
-
-public class Bundle {
-    public string roomName;
-    public string name;
-    public int bundleId;
-    public BundleReward? reward;
-    public string? translatedName;
-    public List<Item> requiredItems;
-    public int requiredQuantity;
-    public int bundleColor;
-
-    public List<Item> missingItems = new();
-    public bool completed = false;
-    public string displayName;
-
-    public Bundle(string roomName, string name, int bundleId, BundleReward? reward, string? translatedName, List<Item> requiredItems, int requiredQuantity, int bundleColor) {
-        this.roomName = roomName;
-        this.name = name;
-        this.bundleId = bundleId;
-        this.reward = reward;
-        this.translatedName = translatedName;
-        this.requiredItems = requiredItems;
-        this.requiredQuantity = requiredQuantity;
-        this.bundleColor = bundleColor;
-
-        if (Game1.getLocationFromName("CommunityCenter") is CommunityCenter cCenter) {
-            for (int i = 0; i < requiredItems.Count; i++) {
-                if (!cCenter.bundles[bundleId][i]) {
-                    missingItems.Add(requiredItems[i]);
-                }
-            }
-        }
-
-        if (requiredItems.Count - missingItems.Count > requiredQuantity) {
-            completed = true;
-        }
-
-        displayName = translatedName ?? name;
     }
 }
