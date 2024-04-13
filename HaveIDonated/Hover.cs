@@ -1,10 +1,8 @@
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
-using StardewValley.Locations;
 using StardewValley.Menus;
 
 namespace HaveIDonated;
@@ -12,12 +10,7 @@ namespace HaveIDonated;
 public class Hover : IDisposable {
     private readonly IModHelper _helper;
 	private readonly PerScreen<Item?> _hoveredItem = new();
-	private readonly List<BundleData> _bundles = new List<BundleData>();
-
-	private BundleData? _bundleDonatable = null;
-
-	private bool _donatableToMuseum = false;
-	private bool _donatableToCenter = false;
+	private readonly List<BundleData> _bundles = new();
 
     public Hover(IModHelper helper) {
         _helper = helper;
@@ -55,34 +48,22 @@ public class Hover : IDisposable {
 
 	#region Methods
 	private void Draw(SpriteBatch spriteBatch) {
-        if (_hoveredItem != null && _hoveredItem.Value is StardewValley.Object obj) {
-			_donatableToCenter = false;
-			_donatableToMuseum = false;
+        if (_hoveredItem != null && _hoveredItem.Value is Item item) {
+			var (bundlesDonatable, donatableToMuseum) = Utils.IsItemDonatable(item, _bundles);
 
-            if (Game1.getLocationFromName("ArchaeologyHouse") is LibraryMuseum museum) {
-                _donatableToMuseum = museum.isItemSuitableForDonation(obj);
-            }
-
-			foreach (BundleData bundle in _bundles) {
-				foreach (Item item in bundle.missingItems) {
-					if (obj.displayName == item.DisplayName) {
-						_donatableToCenter = true;
-						_bundleDonatable = bundle;
-					}
-				}
-			}
-
-			ModEntry.MonitorObject.LogOnce($"CC [{(_donatableToCenter ? "X" : " ")}] M [{(_donatableToMuseum ? "X" : " ")}] - {obj.displayName}", LogLevel.Info);
+			ModEntry.MonitorObject.LogOnce($"CC [{(bundlesDonatable.Count > 0 ? "X" : " ")}] M [{(donatableToMuseum ? "X" : " ")}] - {item.DisplayName}", LogLevel.Info);
 
 			List<Line> lines = new();
-			if(_donatableToCenter) {
-				var icon = Utils.GetBundleIcon(_bundleDonatable.bundleColor);
-				var text = $"{_bundleDonatable.roomName} - {_bundleDonatable.displayName}";
+			if(bundlesDonatable.Count > 0) {
+				foreach(var bundle in bundlesDonatable) {
+                    var icon = Utils.GetBundleIcon(bundle.bundleColor);
+                    var text = $"{bundle.roomName} - {bundle.displayName}";
 
-				lines.Add(new Line(text, icon));
+                    lines.Add(new Line(text, icon));
+                }
 			}
 
-			if(_donatableToMuseum) {
+			if(donatableToMuseum) {
 				var icon = Utils.GetNPCIconByName("Gunther");
 				
 				lines.Add(new Line(Game1.getLocationFromName("ArchaeologyHouse").DisplayName, icon));

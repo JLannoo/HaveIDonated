@@ -213,4 +213,23 @@ public static class Utils {
             1
         );
     }
+
+    public static (List<BundleData>, bool) IsItemDonatable(Item item, List<BundleData> bundles) {
+        List<BundleData> bundlesDonatable = new();
+        bool donatableToMuseum = false;
+
+        if (Game1.getLocationFromName("ArchaeologyHouse") is LibraryMuseum museum) {
+            donatableToMuseum = museum.isItemSuitableForDonation(item);
+        }
+
+        foreach (BundleData bundle in bundles) {
+            foreach (Item missingItem in bundle.missingItems) {
+                if (item.DisplayName == missingItem.DisplayName && item.Quality >= missingItem.Quality) {
+                    bundlesDonatable.Add(bundle);
+                }
+            }
+        }
+
+        return (bundlesDonatable,  donatableToMuseum);
+    }
 }

@@ -33,43 +33,30 @@ public class InventoryIcons : IDisposable {
         var items = GetItemsBeingDrawn();
 
         foreach(var item in items) {
-            bool donateableToCenter = false;
-            bool donateableToMuseum = false;
-            BundleData? bundleDonateable = null;
+            var (bundlesDonatable, donatableToMuseum) = Utils.IsItemDonatable(item.Item1, _bundles);
 
-            if (Game1.getLocationFromName("ArchaeologyHouse") is LibraryMuseum museum) {
-                donateableToMuseum = museum.isItemSuitableForDonation(item.Item1);
-            }
+            if(bundlesDonatable.Count > 0) {
+                foreach(var bundle in bundlesDonatable) {
+                    var icon = Utils.GetBundleIcon(bundle.bundleColor);
+                    float scale = 1.5f;
 
-            foreach (BundleData bundle in _bundles) {
-                foreach (Item missingItem in bundle.missingItems) {
-                    if (item.Item1.DisplayName == missingItem.DisplayName) {
-                        donateableToCenter = true;
-                        bundleDonateable = bundle;
+                    if (icon != null) {
+                        spriteBatch.Draw(
+                            icon.texture,
+                            new Vector2(item.Item2.bounds.Left, item.Item2.bounds.Top),
+                            icon.sourceRect,
+                            Color.White,
+                            0,
+                            Vector2.Zero,
+                            scale,
+                            SpriteEffects.None,
+                            0
+                        );
                     }
                 }
             }
 
-            if(donateableToCenter) {
-                var icon = Utils.GetBundleIcon(bundleDonateable.bundleColor);
-                float scale = 1.5f;
-
-                if (icon != null) {
-                    spriteBatch.Draw(
-                        icon.texture,
-                        new Vector2(item.Item2.bounds.Left, item.Item2.bounds.Top),
-                        icon.sourceRect,
-                        Color.White,
-                        0,
-                        Vector2.Zero,
-                        scale,
-                        SpriteEffects.None,
-                        0
-                    );
-                }
-            }
-
-            if (donateableToMuseum) {
+            if (donatableToMuseum) {
                 var icon = Utils.GetNPCIconByName("Gunther");
 
                 if (icon != null) {

@@ -23,12 +23,16 @@ public class ModEntry: Mod {
     #region Events
     private void onDayStarted(object? sender, DayStartedEventArgs e) {
         hover?.Dispose();
+        inventoryIcons?.Dispose();
+
         hover = new Hover(_helper);
         inventoryIcons = new InventoryIcons(_helper);
     }
 
     private void onInventoryChanged(object? sender, InventoryChangedEventArgs e) {
         hover?.Dispose();
+        inventoryIcons?.Dispose();
+
         hover = new Hover(_helper);
         inventoryIcons = new InventoryIcons(_helper);
     }
