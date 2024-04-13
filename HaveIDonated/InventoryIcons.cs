@@ -24,7 +24,8 @@ public class InventoryIcons : IDisposable {
     }
 
     public void Dispose() {
-        _helper.Events.Display.RenderedActiveMenu += onRenderedMenu;
+        _helper.Events.Display.RenderedActiveMenu -= onRenderedMenu;
+        GC.SuppressFinalize(this);
     }
     #endregion
 
