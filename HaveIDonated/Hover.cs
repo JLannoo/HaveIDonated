@@ -83,17 +83,7 @@ public class Hover : IDisposable {
 			}
 
 			if(_donatableToMuseum) {
-				var gunther = Game1.getCharacterFromName("Gunther");
-				if (gunther == null) {
-					throw new Exception("Could not find Gunther");
-				}
-
-				var icon = new ClickableTextureComponent(
-					new Rectangle(0, 0, Game1.tileSize, Game1.tileSize),
-					gunther.Sprite.Texture,
-                    gunther.getMugShotSourceRect(),
-					Game1.pixelZoom
-				);
+				var icon = Utils.GetNPCIconByName("Gunther");
 				
 				lines.Add(new Line(Game1.getLocationFromName("ArchaeologyHouse").DisplayName, icon));
 			}

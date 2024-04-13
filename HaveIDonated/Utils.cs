@@ -88,7 +88,7 @@ public static class Utils {
                     Vector2.Zero,
                     2f,
                     SpriteEffects.None,
-                1
+                    1
                 );
             }
 
@@ -174,6 +174,22 @@ public static class Utils {
         return bundles;
     }
 
+    public static ClickableTextureComponent GetNPCIconByName(string name) {
+        var gunther = Game1.getCharacterFromName(name);
+        if (gunther == null) {
+            throw new Exception($"Could not find {name}");
+        }
+
+        var icon = new ClickableTextureComponent(
+            new Rectangle(0, 0, Game1.tileSize, Game1.tileSize),
+            gunther.Sprite.Texture,
+            gunther.getMugShotSourceRect(),
+            Game1.pixelZoom
+        );
+
+        return icon;
+    }
+    
     public static ClickableTextureComponent GetBundleIcon(int colorId) {
         if(colorId > 6) {
             throw new Exception($"Invalid colorId {colorId}");

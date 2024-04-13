@@ -6,6 +6,7 @@ namespace HaveIDonated;
 public class ModEntry: Mod {
     private IModHelper _helper;
     private Hover hover;
+    private InventoryIcons inventoryIcons;
 
     public static IMonitor MonitorObject;
 
@@ -23,11 +24,13 @@ public class ModEntry: Mod {
     private void onDayStarted(object? sender, DayStartedEventArgs e) {
         hover?.Dispose();
         hover = new Hover(_helper);
+        inventoryIcons = new InventoryIcons(_helper);
     }
 
     private void onInventoryChanged(object? sender, InventoryChangedEventArgs e) {
         hover?.Dispose();
         hover = new Hover(_helper);
+        inventoryIcons = new InventoryIcons(_helper);
     }
     #endregion
 }
