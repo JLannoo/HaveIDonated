@@ -16,6 +16,7 @@ public class ModEntry: Mod {
     public override void Entry(IModHelper helper) {
         MonitorObject = Monitor;
         _helper = helper;
+
         helper.Events.GameLoop.DayStarted += onDayStarted;
         helper.Events.Player.InventoryChanged += onInventoryChanged;
     }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Force.DeepCloner;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
@@ -117,7 +118,30 @@ public class InventoryIcons : IDisposable {
             drawnItems.AddRange(GetItemsFromMenu(itemMenu.inventory));
         }
 
+        // Shop Menu
+        if (Game1.activeClickableMenu is ShopMenu shopMenu) {
+            drawnItems.AddRange(GetItemsFromMenu(shopMenu));
+            drawnItems.AddRange(GetItemsFromMenu(shopMenu.inventory));
+        }
+
         return drawnItems;
+    }
+
+    private IEnumerable<(Item, ClickableComponent)> GetItemsFromMenu(ShopMenu menu) {
+        List<(Item, ClickableComponent)> items = new();
+
+        for (int i = 0; i < menu.forSaleButtons.Count; i++) {
+            var item = (Item?)menu.forSale[menu.currentItemIndex + i];
+            var component = menu.forSaleButtons[i].DeepClone();
+
+            component.bounds.Width = 105;
+
+            if (item != null) {
+                items.Add((item, component));
+            }
+        }
+
+        return items;
     }
 
     private static List<(Item, ClickableComponent)> GetItemsFromMenu(InventoryMenu menu) {

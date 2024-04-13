@@ -43,6 +43,8 @@ public class Hover : IDisposable {
 		_helper.Events.Display.RenderingHud -= OnRendering;
 		_helper.Events.Display.RenderedHud -= onRendered;
 		_helper.Events.Display.RenderedActiveMenu -= onRenderedActiveMenu;
+
+        GC.SuppressFinalize(this);
 	}
 	#endregion
 
@@ -102,6 +104,12 @@ public class Hover : IDisposable {
         // Chest Menu
         if (Game1.activeClickableMenu is ItemGrabMenu itemMenu) {
             hoverItem = itemMenu.hoveredItem;
+        }
+
+
+        // Shop Menu
+        if (Game1.activeClickableMenu is ShopMenu shopMenu) {
+            hoverItem = (Item?)shopMenu.hoveredItem;
         }
 
         return hoverItem;
