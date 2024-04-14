@@ -1,10 +1,10 @@
 {
   "Name": "HaveIDonated",
-  "Author": "DarkDiosito",
-  "Version": "1.0.0",
+  "Author": "JLannoo",
+  "Version": "1.0.0-beta.1",
   "Description": "It shows you if you have donated an item to the Community Center or Museum.",
-  "UniqueID": "DarkDiosito.HaveIDonated",
+  "UniqueID": "JLannoo.HaveIDonated",
   "EntryDll": "HaveIDonated.dll",
   "MinimumApiVersion": "3.0.0",
-  "UpdateKeys": []
+  "UpdateKeys": ["Github:JLannoo/HaveIDonated"]
 }
