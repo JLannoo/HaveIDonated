@@ -214,6 +214,16 @@ public static class Utils {
         );
     }
 
+    public static ClickableTextureComponent GetItemIcon(Item item) {
+        return new ClickableTextureComponent(
+            new Rectangle(0,0,Game1.tileSize,Game1.tileSize),
+            Game1.objectSpriteSheet,
+            Game1.getSourceRectForStandardTileSheet(Game1.objectSpriteSheet, item.ParentSheetIndex, 16, 16),
+            1,
+            true
+        );
+    }
+
     public static (List<BundleData>, bool) IsItemDonatable(Item item, List<BundleData> bundles) {
         List<BundleData> bundlesDonatable = new();
         bool donatableToMuseum = false;

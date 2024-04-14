@@ -1,8 +1,11 @@
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
+using StardewValley.GameData.Locations;
 using StardewValley.Menus;
 
 namespace HaveIDonated;
@@ -10,6 +13,7 @@ namespace HaveIDonated;
 public class Hover : IDisposable {
     private readonly IModHelper _helper;
 	private readonly PerScreen<Item?> _hoveredItem = new();
+    private readonly PerScreen<BundleData?> _hoveredBundle = new();
 	private readonly List<BundleData> _bundles = new();
 
     public Hover(IModHelper helper) {
@@ -36,6 +40,7 @@ public class Hover : IDisposable {
     #region Events
     private void OnRendering(object? sender, RenderingHudEventArgs e) {
 		_hoveredItem.Value = GetHoveredItem();
+        _hoveredBundle.Value = GetHoveredBundle();
 	}
 
 	public void Dispose() {
@@ -49,16 +54,16 @@ public class Hover : IDisposable {
 
 	#region Methods
 	private void Draw(SpriteBatch spriteBatch) {
-        if (_hoveredItem != null && _hoveredItem.Value is Item item) {
-			var (bundlesDonatable, donatableToMuseum) = Utils.IsItemDonatable(item, _bundles);
+        if (_hoveredItem != null && _hoveredItem.Value is Item hoveredItem) {
+			var (bundlesDonatable, donatableToMuseum) = Utils.IsItemDonatable(hoveredItem, _bundles);
 
-			ModEntry.MonitorObject.LogOnce($"CC [{(bundlesDonatable.Count > 0 ? "X" : " ")}] M [{(donatableToMuseum ? "X" : " ")}] - {item.DisplayName}", LogLevel.Info);
+			ModEntry.MonitorObject.LogOnce($"CC [{(bundlesDonatable.Count > 0 ? "X" : " ")}] M [{(donatableToMuseum ? "X" : " ")}] - {hoveredItem.DisplayName}", LogLevel.Info);
 
 			List<Line> lines = new();
 			if(bundlesDonatable.Count > 0) {
-				foreach(var bundle in bundlesDonatable) {
-                    var icon = Utils.GetBundleIcon(bundle.bundleColor);
-                    var text = $"{bundle.roomName} - {bundle.displayName}";
+				foreach(var bundleDonatable in bundlesDonatable) {
+                    var icon = Utils.GetBundleIcon(bundleDonatable.bundleColor);
+                    var text = $"{bundleDonatable.roomName} - {bundleDonatable.displayName}";
 
                     lines.Add(new Line(text, icon));
                 }
@@ -74,18 +79,44 @@ public class Hover : IDisposable {
                 Utils.DrawTooltip(spriteBatch, lines);
             }
         }
+
+        if(_hoveredBundle != null && _hoveredBundle.Value is BundleData hoveredBundle) {
+            List<Line> lines = new();
+
+            foreach(var missingItem in hoveredBundle.missingItems) {
+                foreach(var playerItem in Game1.player.Items) {
+                    if(playerItem != null && playerItem.DisplayName == missingItem.DisplayName) {
+                        var icon = Utils.GetItemIcon(playerItem);
+
+                        lines.Add(new Line(playerItem.DisplayName, icon));
+                    }
+                }
+            }
+
+            if(lines.Count > 0) {
+                Utils.DrawTooltip(spriteBatch, lines);
+            }
+        }
 	}
 
-    public static Item? GetHoveredItem() {
+    public Item? GetHoveredItem() {
         Item? hoverItem = null;
 
-        // Toolbar 
+        // No active menues
         if (Game1.activeClickableMenu == null && Game1.onScreenMenus != null) {
             foreach (IClickableMenu menu in Game1.onScreenMenus) {
+                // Toolbar
 				if(menu is Toolbar toolbar) {
 					hoverItem = toolbar.hoverItem;
 				}
             }
+
+            // Forageables
+            var mouseTile = Game1.currentCursorTile;
+            Game1.currentLocation.objects.TryGetValue(mouseTile, out var itemAtMouseTile);
+            if(itemAtMouseTile is Item item) {
+                hoverItem = item;
+            };
         }
 
         switch(Game1.activeClickableMenu) {
@@ -113,6 +144,26 @@ public class Hover : IDisposable {
         }
 
         return hoverItem;
+    }
+
+    private BundleData? GetHoveredBundle() {
+        BundleData? hoveredBundle = null;
+
+        if (Game1.activeClickableMenu != null && Game1.activeClickableMenu is JunimoNoteMenu bundleMenu && !bundleMenu.specificBundlePage) {
+            var cursorPosition = _helper.Input.GetCursorPosition().GetScaledScreenPixels();
+
+            foreach (var menuBundle in bundleMenu.bundles) {
+                if (menuBundle.bounds.Contains(cursorPosition)) {
+                    foreach (var bundle in _bundles) {
+                        if (bundle.name == menuBundle.name) {
+                            hoveredBundle = bundle;
+                        }
+                    }
+                }
+            }
+        }
+
+        return hoveredBundle;
     }
     #endregion
 }
