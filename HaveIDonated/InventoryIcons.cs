@@ -99,29 +99,30 @@ public class InventoryIcons : IDisposable {
             }
         }
 
-        // Menu pages
-        if (Game1.activeClickableMenu is GameMenu gameMenu) {
-            switch (gameMenu.GetCurrentPage()) {
-                case InventoryPage inventory:
-                    drawnItems.AddRange(GetItemsFromMenu(inventory.inventory));
-                    break;
-                case CraftingPage crafting:
-                    drawnItems.AddRange(GetItemsFromMenu(crafting.inventory));
-                    break;
-            }
-        }
+        switch (Game1.activeClickableMenu) {
+            // ESC Menu
+            case GameMenu gameMenu:
+                switch (gameMenu.GetCurrentPage()) {
+                    case InventoryPage inventory:
+                        drawnItems.AddRange(GetItemsFromMenu(inventory.inventory));
+                        break;
+                    case CraftingPage crafting:
+                        drawnItems.AddRange(GetItemsFromMenu(crafting.inventory));
+                        break;
+                }
+                break;
 
+            // Chest Menu
+            case ItemGrabMenu itemMenu:
+                drawnItems.AddRange(GetItemsFromMenu(itemMenu.ItemsToGrabMenu));
+                drawnItems.AddRange(GetItemsFromMenu(itemMenu.inventory));
+                break;
 
-        // Chest Menu
-        if (Game1.activeClickableMenu is ItemGrabMenu itemMenu) {
-            drawnItems.AddRange(GetItemsFromMenu(itemMenu.ItemsToGrabMenu));
-            drawnItems.AddRange(GetItemsFromMenu(itemMenu.inventory));
-        }
-
-        // Shop Menu
-        if (Game1.activeClickableMenu is ShopMenu shopMenu) {
-            drawnItems.AddRange(GetItemsFromMenu(shopMenu));
-            drawnItems.AddRange(GetItemsFromMenu(shopMenu.inventory));
+            // Shop Menues
+            case ShopMenu shopMenu:
+                drawnItems.AddRange(GetItemsFromMenu(shopMenu));
+                drawnItems.AddRange(GetItemsFromMenu(shopMenu.inventory));
+                break;
         }
 
         return drawnItems;

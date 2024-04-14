@@ -34,7 +34,6 @@ public class Hover : IDisposable {
 	}
 
     #region Events
-
     private void OnRendering(object? sender, RenderingHudEventArgs e) {
 		_hoveredItem.Value = GetHoveredItem();
 	}
@@ -89,27 +88,28 @@ public class Hover : IDisposable {
             }
         }
 
-        // Menu pages
-        if (Game1.activeClickableMenu is GameMenu gameMenu) {
-            switch (gameMenu.GetCurrentPage()) {
-                case InventoryPage inventory:
-                    hoverItem = inventory.hoveredItem;
-                    break;
-                case CraftingPage crafting:
-                    hoverItem = crafting.hoverItem;
-                    break;
-            }
-        }
+        switch(Game1.activeClickableMenu) {
+            // ESC Menu
+            case GameMenu gameMenu:
+                switch (gameMenu.GetCurrentPage()) {
+                    case InventoryPage inventory:
+                        hoverItem = inventory.hoveredItem;
+                        break;
+                    case CraftingPage crafting:
+                        hoverItem = crafting.hoverItem;
+                        break;
+                }
+                break;
 
-        // Chest Menu
-        if (Game1.activeClickableMenu is ItemGrabMenu itemMenu) {
-            hoverItem = itemMenu.hoveredItem;
-        }
+            // Chest Menu
+            case ItemGrabMenu itemMenu:
+                hoverItem = itemMenu.hoveredItem;
+                break;
 
-
-        // Shop Menu
-        if (Game1.activeClickableMenu is ShopMenu shopMenu) {
-            hoverItem = (Item?)shopMenu.hoveredItem;
+            // Shop Menues
+            case ShopMenu shopMenu:
+                hoverItem = (Item?)shopMenu.hoveredItem;
+                break;
         }
 
         return hoverItem;
