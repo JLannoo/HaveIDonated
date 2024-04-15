@@ -126,19 +126,19 @@ public class Hover : IDisposable {
 
         // No active menues
         if (Game1.activeClickableMenu == null && Game1.onScreenMenus != null) {
+            // Forageables
+            var mouseTile = Game1.currentCursorTile;
+            Game1.currentLocation.objects.TryGetValue(mouseTile, out var itemAtMouseTile);
+            if (itemAtMouseTile is Item item) {
+                hoverItem = item;
+            };
+
             foreach (IClickableMenu menu in Game1.onScreenMenus) {
                 // Toolbar
 				if(menu is Toolbar toolbar) {
 					hoverItem = toolbar.hoverItem;
 				}
             }
-
-            // Forageables
-            var mouseTile = Game1.currentCursorTile;
-            Game1.currentLocation.objects.TryGetValue(mouseTile, out var itemAtMouseTile);
-            if(itemAtMouseTile is Item item) {
-                hoverItem = item;
-            };
         }
 
         switch(Game1.activeClickableMenu) {
