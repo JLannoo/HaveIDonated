@@ -12,9 +12,9 @@ public class InventoryIcons : IDisposable {
     private readonly IModHelper _helper;
     private readonly List<BundleData> _bundles;
 
-    public InventoryIcons(IModHelper helper) {
+    public InventoryIcons(IModHelper helper, List<BundleData> bundleData) {
         _helper = helper;
-        _bundles = Utils.GetBundleData();
+        _bundles = bundleData;
 
         _helper.Events.Display.RenderedActiveMenu += onRenderedMenu;
     }

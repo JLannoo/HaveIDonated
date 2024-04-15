@@ -17,9 +17,9 @@ public class Hover : IDisposable {
     private readonly PerScreen<BundleData?> _hoveredBundle = new();
 	private readonly List<BundleData> _bundles = new();
 
-    public Hover(IModHelper helper) {
+    public Hover(IModHelper helper, List<BundleData> bundleData) {
         _helper = helper;
-		_bundles = Utils.GetBundleData();
+		_bundles = bundleData;
 
         _helper.Events.Display.RenderingHud += OnRendering;
         _helper.Events.Display.RenderedHud += OnRendered;
@@ -36,7 +36,7 @@ public class Hover : IDisposable {
                 var area = CommunityCenter.getAreaNumberFromName(bundlesDonatable[0].roomName);
 
                 JunimoNoteMenu menu = new(true, area, true);
-                Bundle bundle = menu.bundles.FirstOrDefault(a => bundlesDonatable[0].name == a.label);
+                Bundle? bundle = menu.bundles.FirstOrDefault(a => bundlesDonatable[0].name == a.label);
 
                 if (bundle != null) {
                     menu = new(bundle, JunimoNoteMenu.noteTextureName);

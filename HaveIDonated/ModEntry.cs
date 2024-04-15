@@ -5,6 +5,7 @@ namespace HaveIDonated;
 
 public class ModEntry: Mod {
     private IModHelper _helper;
+
     private Hover hover;
     private InventoryIcons inventoryIcons;
 
@@ -17,25 +18,30 @@ public class ModEntry: Mod {
         MonitorObject = Monitor;
         _helper = helper;
 
-        helper.Events.GameLoop.DayStarted += onDayStarted;
-        helper.Events.Player.InventoryChanged += onInventoryChanged;
+        helper.Events.GameLoop.DayStarted += OnDayStarted;
+        helper.Events.Player.InventoryChanged += OnInventoryChanged;
     }
 
     #region Events
-    private void onDayStarted(object? sender, DayStartedEventArgs e) {
-        hover?.Dispose();
-        inventoryIcons?.Dispose();
-
-        hover = new Hover(_helper);
-        inventoryIcons = new InventoryIcons(_helper);
+    private void OnDayStarted(object? sender, DayStartedEventArgs e) {
+        RestartModFunctions();
     }
 
-    private void onInventoryChanged(object? sender, InventoryChangedEventArgs e) {
+    private void OnInventoryChanged(object? sender, InventoryChangedEventArgs e) {
+        RestartModFunctions();
+    }
+    #endregion
+
+    #region Methods
+    private void RestartModFunctions() {
         hover?.Dispose();
         inventoryIcons?.Dispose();
 
-        hover = new Hover(_helper);
-        inventoryIcons = new InventoryIcons(_helper);
+        List<BundleData> bundleData = Utils.GetBundleData();
+
+        hover = new Hover(_helper, bundleData);
+        inventoryIcons = new InventoryIcons(_helper, bundleData);
+
     }
     #endregion
 }
