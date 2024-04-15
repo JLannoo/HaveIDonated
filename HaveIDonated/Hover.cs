@@ -6,6 +6,7 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.GameData.Locations;
+using StardewValley.ItemTypeDefinitions;
 using StardewValley.Locations;
 using StardewValley.Menus;
 
@@ -30,7 +31,35 @@ public class Hover : IDisposable {
     #region Events
     private void OnButtonPressed(object? sender, ButtonPressedEventArgs e) {
         if (_hoveredItem.Value != null && e.Button == SButton.F1) {
-            var (bundlesDonatable, _) = Utils.IsItemDonatable(_hoveredItem.Value, _bundles);
+            var (bundlesDonatable, museumDonatable) = Utils.IsItemDonatable(_hoveredItem.Value, _bundles);
+
+            if (museumDonatable) {
+                var menu = new GameMenu(GameMenu.collectionsTab);
+
+                if (menu.GetCurrentPage() is CollectionsPage page) {
+                    string? itemCategory = _hoveredItem.Value.getCategoryName();
+
+                    if (itemCategory == "Artifact") {
+                        page.currentTab = CollectionsPage.archaeologyTab;
+                    } else if (itemCategory == "Mineral") {
+                        page.currentTab = CollectionsPage.mineralsTab;
+                    };
+
+                    // Last item in collection has items' ClickableTextureComponent
+                    List<ClickableTextureComponent> components = page.collections[page.currentTab].Last();
+                    foreach (var component in components) {
+                        // component.name has format "ItemID bool bool"
+                        string[] strings = component.name.Split(' ');
+                        ParsedItemData item = ItemRegistry.GetData(strings[0]);
+
+                        if (item.DisplayName == _hoveredItem.Value.DisplayName) {
+                            Game1.setMousePosition(new Point((int)(component.bounds.Center.X / Game1.options.zoomLevel), (int)(component.bounds.Center.Y / Game1.options.zoomLevel)));
+                        }
+                    }
+
+                    Game1.activeClickableMenu = menu;
+                }
+            }
 
             if (bundlesDonatable.Count > 0) {
                 var area = CommunityCenter.getAreaNumberFromName(bundlesDonatable[0].roomName);
