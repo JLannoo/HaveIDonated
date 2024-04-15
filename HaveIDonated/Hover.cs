@@ -6,6 +6,7 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.GameData.Locations;
+using StardewValley.Locations;
 using StardewValley.Menus;
 
 namespace HaveIDonated;
@@ -21,23 +22,43 @@ public class Hover : IDisposable {
 		_bundles = Utils.GetBundleData();
 
         _helper.Events.Display.RenderingHud += OnRendering;
-        _helper.Events.Display.RenderedHud += onRendered;
-        _helper.Events.Display.RenderedActiveMenu += onRenderedActiveMenu;
-	}
-
-    private void onRenderedActiveMenu(object? sender, RenderedActiveMenuEventArgs e) {
-        if(Game1.activeClickableMenu != null) {
-			Draw(Game1.spriteBatch);
-		}
-    }
-
-    private void onRendered(object? sender, RenderedHudEventArgs e) {
-		if (Game1.activeClickableMenu == null) {
-			Draw(Game1.spriteBatch);
-		}
+        _helper.Events.Display.RenderedHud += OnRendered;
+        _helper.Events.Display.RenderedActiveMenu += OnRenderedActiveMenu;
+        _helper.Events.Input.ButtonPressed += OnButtonPressed;
 	}
 
     #region Events
+    private void OnButtonPressed(object? sender, ButtonPressedEventArgs e) {
+        if (_hoveredItem.Value != null && e.Button == SButton.F1) {
+            var (bundlesDonatable, _) = Utils.IsItemDonatable(_hoveredItem.Value, _bundles);
+
+            if (bundlesDonatable.Count > 0) {
+                var area = CommunityCenter.getAreaNumberFromName(bundlesDonatable[0].roomName);
+
+                JunimoNoteMenu menu = new(true, area, true);
+                Bundle bundle = menu.bundles.FirstOrDefault(a => bundlesDonatable[0].name == a.label);
+
+                if (bundle != null) {
+                    menu = new(bundle, JunimoNoteMenu.noteTextureName);
+                }
+
+                Game1.activeClickableMenu = menu;
+            }
+        }
+    }
+
+    private void OnRenderedActiveMenu(object? sender, RenderedActiveMenuEventArgs e) {
+        if (Game1.activeClickableMenu != null) {
+            Draw(Game1.spriteBatch);
+        }
+    }
+
+    private void OnRendered(object? sender, RenderedHudEventArgs e) {
+        if (Game1.activeClickableMenu == null) {
+            Draw(Game1.spriteBatch);
+        }
+    }
+
     private void OnRendering(object? sender, RenderingHudEventArgs e) {
 		_hoveredItem.Value = GetHoveredItem();
         _hoveredBundle.Value = GetHoveredBundle();
@@ -45,8 +66,9 @@ public class Hover : IDisposable {
 
 	public void Dispose() {
 		_helper.Events.Display.RenderingHud -= OnRendering;
-		_helper.Events.Display.RenderedHud -= onRendered;
-		_helper.Events.Display.RenderedActiveMenu -= onRenderedActiveMenu;
+		_helper.Events.Display.RenderedHud -= OnRendered;
+		_helper.Events.Display.RenderedActiveMenu -= OnRenderedActiveMenu;
+        _helper.Events.Input.ButtonPressed -= OnButtonPressed;
 
         GC.SuppressFinalize(this);
 	}
@@ -99,7 +121,7 @@ public class Hover : IDisposable {
         }
 	}
 
-    public Item? GetHoveredItem() {
+    public static Item? GetHoveredItem() {
         Item? hoverItem = null;
 
         // No active menues

@@ -132,13 +132,15 @@ public class InventoryIcons : IDisposable {
         List<(Item, ClickableComponent)> items = new();
 
         for (int i = 0; i < menu.forSaleButtons.Count; i++) {
-            var item = (Item?)menu.forSale[menu.currentItemIndex + i];
-            var component = menu.forSaleButtons[i].DeepClone();
+            if(menu.forSale.Count > menu.currentItemIndex+i) {
+                var item = (Item?)menu.forSale[menu.currentItemIndex + i];
+                var component = menu.forSaleButtons[i].DeepClone();
 
-            component.bounds.Width = 105;
+                component.bounds.Width = 105;
 
-            if (item != null) {
-                items.Add((item, component));
+                if (item != null) {
+                    items.Add((item, component));
+                }
             }
         }
 
