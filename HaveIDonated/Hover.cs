@@ -158,13 +158,13 @@ public class Hover : IDisposable {
             // Forageables
             var mouseTile = Game1.currentCursorTile;
             Game1.currentLocation.objects.TryGetValue(mouseTile, out var itemAtMouseTile);
-            if (itemAtMouseTile is Item item) {
-                hoverItem = item;
+            if (itemAtMouseTile is Item forageableItem) {
+                hoverItem = forageableItem;
             };
 
             foreach (IClickableMenu menu in Game1.onScreenMenus) {
                 // Toolbar
-				if(menu is Toolbar toolbar) {
+                if (menu is Toolbar toolbar && toolbar.hoverItem is Item toolbarItem) {
 					hoverItem = toolbar.hoverItem;
 				}
             }
