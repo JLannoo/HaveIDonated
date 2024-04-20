@@ -197,6 +197,11 @@ public class Hover : IDisposable {
             case GeodeMenu geodeMenu:
                 hoverItem = geodeMenu.hoveredItem;
                 break;
+
+            // Bundle item giving menu
+            case JunimoNoteMenu junimoNoteMenu:
+                hoverItem = junimoNoteMenu.hoveredItem;
+                break;
         }
 
         return hoverItem;

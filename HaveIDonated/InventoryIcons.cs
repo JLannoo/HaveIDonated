@@ -128,6 +128,12 @@ public class InventoryIcons : IDisposable {
             case GeodeMenu geodeMenu:
                 drawnItems.AddRange(GetItemsFromMenu(geodeMenu.inventory));
                 break;
+
+            // Bundle item giving menu
+            case JunimoNoteMenu junimoNoteMenu:
+                if (!junimoNoteMenu.specificBundlePage) break;
+                drawnItems.AddRange(GetItemsFromMenu(junimoNoteMenu.inventory));
+                break;
         }
 
         return drawnItems;
