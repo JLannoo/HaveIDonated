@@ -123,6 +123,11 @@ public class InventoryIcons : IDisposable {
                 drawnItems.AddRange(GetItemsFromMenu(shopMenu));
                 drawnItems.AddRange(GetItemsFromMenu(shopMenu.inventory));
                 break;
+
+            // Clint's Geode Menu
+            case GeodeMenu geodeMenu:
+                drawnItems.AddRange(GetItemsFromMenu(geodeMenu.inventory));
+                break;
         }
 
         return drawnItems;

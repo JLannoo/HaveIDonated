@@ -192,6 +192,11 @@ public class Hover : IDisposable {
             case ShopMenu shopMenu:
                 hoverItem = (Item?)shopMenu.hoveredItem;
                 break;
+
+            // Clint's Geode breaking Menu
+            case GeodeMenu geodeMenu:
+                hoverItem = geodeMenu.hoveredItem;
+                break;
         }
 
         return hoverItem;
