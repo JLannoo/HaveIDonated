@@ -244,4 +244,15 @@ public static class Utils {
 
         return (bundlesDonatable,  donatableToMuseum);
     }
+
+    /// <summary>
+    /// Time in ms is approximate. Game tickrate might vary slightly.
+    /// </summary>
+    public static float Oscillate(float periodInMS, float amplitude) {
+        float result = (float)Math.Sin((2*Math.PI / (periodInMS/1000)) * (Game1.ticks / 60f)) * amplitude;
+        if (result == amplitude) {
+            ModEntry.MonitorObject.Log("Tick");
+        }
+        return result;
+    }
 }

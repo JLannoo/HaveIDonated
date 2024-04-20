@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
-using StardewValley.Locations;
+using StardewValley.ItemTypeDefinitions;
 using StardewValley.Menus;
 
 namespace HaveIDonated;
@@ -33,6 +33,7 @@ public class InventoryIcons : IDisposable {
     #region Methods
     private void Draw(SpriteBatch spriteBatch) {
         var items = GetItemsBeingDrawn();
+        var noteBundles = GetBundlesBeingDraw();
 
         foreach(var item in items) {
             var (bundlesDonatable, donatableToMuseum) = Utils.IsItemDonatable(item.Item1, _bundles);
@@ -75,6 +76,34 @@ public class InventoryIcons : IDisposable {
                         SpriteEffects.None,
                         0
                     );
+                }
+            }
+        }
+
+        foreach(var noteBundle in noteBundles) {
+            string[] bundleItemIDs = noteBundle.ingredients.Select(item => item.id).ToArray();
+            ParsedItemData[] itemsInBundle = bundleItemIDs.Select(id => ItemRegistry.GetData(id)).ToArray();
+            
+            foreach(var inventoryItem in Game1.player.Items) {
+                if(inventoryItem != null && itemsInBundle.FirstOrDefault(i => i.DisplayName == inventoryItem.DisplayName) != null) {
+                    var icon = new ClickableTextureComponent(new Rectangle(1,1,200,200), Game1.mouseCursors, new Rectangle(401, 496, 9, 14), 4f);
+                    float scale = 2f + Utils.Oscillate(2000, 0.2f);
+
+                    spriteBatch.Draw(
+                        icon.texture,
+                        new Vector2(
+                            noteBundle.bounds.Right - (icon.sourceRect.Width/2) * scale,
+                            (int)(noteBundle.bounds.Top - (icon.sourceRect.Height / 2) * scale)
+                        ),
+                        icon.sourceRect,
+                        Color.White,
+                        0,
+                        Vector2.Zero,
+                        scale,
+                        SpriteEffects.None,
+                        1
+                    );
+
                 }
             }
         }
@@ -168,6 +197,19 @@ public class InventoryIcons : IDisposable {
             if (item != null && component.visible) {
                 items.Add((item, component));
             }
+        }
+
+        return items;
+    }
+
+    private static List<Bundle> GetBundlesBeingDraw() {
+        List<Bundle> items = new();
+        
+        if(Game1.activeClickableMenu is JunimoNoteMenu menu && !menu.specificBundlePage) {
+            foreach (var bundle in menu.bundles) {
+                items.Add(bundle);
+            }
+
         }
 
         return items;
