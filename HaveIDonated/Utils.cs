@@ -234,7 +234,9 @@ public static class Utils {
 
         foreach (BundleData bundle in bundles) {
             foreach (Item missingItem in bundle.missingItems) {
-                if (item.DisplayName == missingItem.DisplayName && item.Quality >= missingItem.Quality) {
+                bool isJelly = missingItem.DisplayName == "Jelly" && item.DisplayName.ToLower().Contains("jelly");
+
+                if ((item.DisplayName == missingItem.DisplayName && item.Quality >= missingItem.Quality) || isJelly) {
                     bundlesDonatable.Add(bundle);
                 }
             }
