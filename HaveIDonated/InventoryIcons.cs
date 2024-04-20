@@ -91,7 +91,7 @@ public class InventoryIcons : IDisposable {
                         var button = toolbar.buttons[i];
                         var item = Game1.player.Items[i];
 
-                        if (item != null) {
+                        if (item != null && button.visible) {
                             drawnItems.Add((item, button));
                         }
                     }
@@ -138,7 +138,7 @@ public class InventoryIcons : IDisposable {
 
                 component.bounds.Width = 105;
 
-                if (item != null) {
+                if (item != null && component.visible) {
                     items.Add((item, component));
                 }
             }
@@ -154,7 +154,7 @@ public class InventoryIcons : IDisposable {
             var item = menu.actualInventory[i];
             var component = menu.inventory[i];
 
-            if (item != null) {
+            if (item != null && component.visible) {
                 items.Add((item, component));
             }
         }
