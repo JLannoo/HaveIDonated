@@ -23,7 +23,6 @@ public class Hover : IDisposable {
 		_bundles = bundleData;
 
         _helper.Events.Display.RenderingHud += OnRendering;
-        _helper.Events.Display.RenderedHud += OnRendered;
         _helper.Events.Display.RenderedActiveMenu += OnRenderedActiveMenu;
         _helper.Events.Input.ButtonPressed += OnButtonPressed;
 	}
@@ -77,15 +76,7 @@ public class Hover : IDisposable {
     }
 
     private void OnRenderedActiveMenu(object? sender, RenderedActiveMenuEventArgs e) {
-        if (Game1.activeClickableMenu != null) {
-            Draw(Game1.spriteBatch);
-        }
-    }
-
-    private void OnRendered(object? sender, RenderedHudEventArgs e) {
-        if (Game1.activeClickableMenu == null) {
-            Draw(Game1.spriteBatch);
-        }
+        Draw(Game1.spriteBatch);
     }
 
     private void OnRendering(object? sender, RenderingHudEventArgs e) {
@@ -95,7 +86,6 @@ public class Hover : IDisposable {
 
 	public void Dispose() {
 		_helper.Events.Display.RenderingHud -= OnRendering;
-		_helper.Events.Display.RenderedHud -= OnRendered;
 		_helper.Events.Display.RenderedActiveMenu -= OnRenderedActiveMenu;
         _helper.Events.Input.ButtonPressed -= OnButtonPressed;
 

@@ -107,6 +107,11 @@ public class InventoryIcons : IDisposable {
                 }
             }
         }
+
+        if(Game1.activeClickableMenu is IClickableMenu menu) {
+            menu.drawMouse(spriteBatch);
+            
+        }
     }
 
     private List<(Item, ClickableComponent)> GetItemsBeingDrawn() {
@@ -209,7 +214,6 @@ public class InventoryIcons : IDisposable {
             foreach (var bundle in menu.bundles) {
                 items.Add(bundle);
             }
-
         }
 
         return items;

@@ -92,9 +92,7 @@ public static class Utils {
                 );
             }
 
-            // Draw text
-            spriteBatch.DrawString(Game1.smallFont, line.text, textPosition + new Vector2(2, 2), Game1.textShadowColor);
-            spriteBatch.DrawString(Game1.smallFont, line.text, textPosition, Game1.textColor);
+            Utility.drawTextWithShadow(spriteBatch, line.text, Game1.smallFont, textPosition, Game1.textColor);
         }
     }
 

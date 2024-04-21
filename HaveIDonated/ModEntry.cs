@@ -34,13 +34,13 @@ public class ModEntry: Mod {
 
     #region Methods
     private void RestartModFunctions() {
-        hover?.Dispose();
         inventoryIcons?.Dispose();
+        hover?.Dispose();
 
         List<BundleData> bundleData = Utils.GetBundleData();
 
-        hover = new Hover(_helper, bundleData);
         inventoryIcons = new InventoryIcons(_helper, bundleData);
+        hover = new Hover(_helper, bundleData);
 
     }
     #endregion
