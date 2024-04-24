@@ -1,7 +1,7 @@
 {
   "Name": "HaveIDonated",
   "Author": "JLannoo",
-  "Version": "1.0.0-beta.2",
+  "Version": "1.0.0-beta.3",
   "Description": "It shows you if you have donated an item to the Community Center or Museum.",
   "UniqueID": "JLannoo.HaveIDonated",
   "EntryDll": "HaveIDonated.dll",
