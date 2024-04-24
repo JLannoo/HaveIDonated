@@ -1,7 +1,9 @@
 ﻿using Force.DeepCloner;
+using HaveIDonated.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.ItemTypeDefinitions;
 using StardewValley.Menus;
@@ -12,30 +14,39 @@ public class InventoryIcons : IDisposable {
     private readonly IModHelper _helper;
     private readonly List<BundleData> _bundles;
 
+    private readonly PerScreen<List<(Item, ClickableComponent)>> itemsDrawn = new();
+    private readonly PerScreen<List<Bundle>> bundlesDrawn = new();
+
     public InventoryIcons(IModHelper helper, List<BundleData> bundleData) {
         _helper = helper;
         _bundles = bundleData;
 
-        _helper.Events.Display.RenderedActiveMenu += onRenderedMenu;
+        GetBeingDrawn();
+
+        _helper.Events.Display.RenderedActiveMenu += OnRenderedActiveMenu;
     }
 
     #region Events
-    private void onRenderedMenu(object? sender, StardewModdingAPI.Events.RenderedActiveMenuEventArgs e) {
-        Draw(Game1.spriteBatch);
+    private void OnRenderedActiveMenu(object? sender, StardewModdingAPI.Events.RenderedActiveMenuEventArgs e) {
+        GetBeingDrawn();
     }
 
     public void Dispose() {
-        _helper.Events.Display.RenderedActiveMenu -= onRenderedMenu;
+        _helper.Events.Display.RenderedActiveMenu -= OnRenderedActiveMenu;
         GC.SuppressFinalize(this);
     }
     #endregion
 
     #region Methods
-    private void Draw(SpriteBatch spriteBatch) {
-        var items = GetItemsBeingDrawn();
-        var noteBundles = GetBundlesBeingDraw();
+    public void GetBeingDrawn() {
+        itemsDrawn.Value = GetItemsBeingDrawn();
+        bundlesDrawn.Value = GetBundlesBeingDrawn();
+    }
 
-        foreach(var item in items) {
+    public void Draw(SpriteBatch spriteBatch) {
+        if (itemsDrawn.Value == null || bundlesDrawn.Value == null) return;
+
+        foreach(var item in itemsDrawn.Value) {
             var (bundlesDonatable, donatableToMuseum) = Utils.IsItemDonatable(item.Item1, _bundles);
 
             if(bundlesDonatable.Count > 0) {
@@ -53,7 +64,7 @@ public class InventoryIcons : IDisposable {
                             Vector2.Zero,
                             scale,
                             SpriteEffects.None,
-                            0
+                            1
                         );
                     }
                 }
@@ -74,13 +85,13 @@ public class InventoryIcons : IDisposable {
                         Vector2.Zero,
                         scale,
                         SpriteEffects.None,
-                        0
+                        1
                     );
                 }
             }
         }
 
-        foreach(var noteBundle in noteBundles) {
+        foreach(var noteBundle in bundlesDrawn.Value) {
             string[] bundleItemIDs = noteBundle.ingredients.Select(item => item.id).ToArray();
             ParsedItemData[] itemsInBundle = bundleItemIDs.Select(id => ItemRegistry.GetData(id)).ToArray();
             
@@ -106,11 +117,6 @@ public class InventoryIcons : IDisposable {
 
                 }
             }
-        }
-
-        if(Game1.activeClickableMenu is IClickableMenu menu) {
-            menu.drawMouse(spriteBatch);
-            
         }
     }
 
@@ -207,7 +213,7 @@ public class InventoryIcons : IDisposable {
         return items;
     }
 
-    private static List<Bundle> GetBundlesBeingDraw() {
+    private static List<Bundle> GetBundlesBeingDrawn() {
         List<Bundle> items = new();
         
         if(Game1.activeClickableMenu is JunimoNoteMenu menu && !menu.specificBundlePage) {

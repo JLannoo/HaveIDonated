@@ -1,4 +1,7 @@
-﻿using StardewModdingAPI;
+﻿using HarmonyLib;
+using HaveIDonated.Models;
+using HaveIDonated.Patches;
+using StardewModdingAPI;
 using StardewModdingAPI.Events;
 
 namespace HaveIDonated;
@@ -6,10 +9,11 @@ namespace HaveIDonated;
 public class ModEntry: Mod {
     private IModHelper _helper;
 
-    private Hover hover;
-    private InventoryIcons inventoryIcons;
+    public static Hover hover;
+    public static InventoryIcons inventoryIcons;
 
     public static IMonitor MonitorObject;
+    public static Harmony HarmonyObject;
 
     /// <summary>
     /// Executed when mod is first loaded
@@ -17,6 +21,8 @@ public class ModEntry: Mod {
     public override void Entry(IModHelper helper) {
         MonitorObject = Monitor;
         _helper = helper;
+
+        InitializeHarmony();
 
         helper.Events.GameLoop.DayStarted += OnDayStarted;
         helper.Events.Player.InventoryChanged += OnInventoryChanged;
@@ -42,6 +48,11 @@ public class ModEntry: Mod {
         inventoryIcons = new InventoryIcons(_helper, bundleData);
         hover = new Hover(_helper, bundleData);
 
+    }
+
+    private void InitializeHarmony() {
+        HarmonyObject = new Harmony(ModManifest.UniqueID);
+        InventoryPatches.Initialize(Monitor, HarmonyObject);
     }
     #endregion
 }

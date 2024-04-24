@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using HaveIDonated.Models;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 using StardewValley.Locations;
@@ -248,9 +249,6 @@ public static class Utils {
     /// </summary>
     public static float Oscillate(float periodInMS, float amplitude) {
         float result = (float)Math.Sin((2*Math.PI / (periodInMS/1000)) * (Game1.ticks / 60f)) * amplitude;
-        if (result == amplitude) {
-            ModEntry.MonitorObject.Log("Tick");
-        }
         return result;
     }
 }

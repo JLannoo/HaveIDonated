@@ -1,9 +1,10 @@
 ﻿using StardewValley.Locations;
 using StardewValley;
 
-namespace HaveIDonated;
+namespace HaveIDonated.Models;
 
-public class BundleData {
+public class BundleData
+{
     public string roomName;
     public string name;
     public int bundleId;
@@ -17,7 +18,8 @@ public class BundleData {
     public bool completed = false;
     public string displayName;
 
-    public BundleData(string roomName, string name, int bundleId, BundleReward? reward, string? translatedName, List<Item> requiredItems, int requiredQuantity, int bundleColor) {
+    public BundleData(string roomName, string name, int bundleId, BundleReward? reward, string? translatedName, List<Item> requiredItems, int requiredQuantity, int bundleColor)
+    {
         this.roomName = roomName;
         this.name = name;
         this.bundleId = bundleId;
@@ -27,15 +29,19 @@ public class BundleData {
         this.requiredQuantity = requiredQuantity;
         this.bundleColor = bundleColor;
 
-        if (Game1.getLocationFromName("CommunityCenter") is CommunityCenter cCenter) {
-            for (int i = 0; i < requiredItems.Count; i++) {
-                if (!cCenter.bundles[bundleId][i]) {
+        if (Game1.getLocationFromName("CommunityCenter") is CommunityCenter cCenter)
+        {
+            for (int i = 0; i < requiredItems.Count; i++)
+            {
+                if (!cCenter.bundles[bundleId][i])
+                {
                     missingItems.Add(requiredItems[i]);
                 }
             }
         }
 
-        if (requiredItems.Count - missingItems.Count > requiredQuantity) {
+        if (requiredItems.Count - missingItems.Count >= requiredQuantity)
+        {
             completed = true;
         }
 
@@ -43,19 +49,24 @@ public class BundleData {
     }
 }
 
-public class BundleReward {
+public class BundleReward
+{
     public int quantity;
     public Item item;
 
-    public BundleReward(string data) {
+    public BundleReward(string data)
+    {
         string[] arr = data.Split(' ');
 
         string type = arr[0];
         string id = arr[1];
         bool parsed = int.TryParse(arr[2], out quantity);
-        if (parsed) {
+        if (parsed)
+        {
             item = ItemRegistry.Create(id, quantity);
-        } else {
+        }
+        else
+        {
             throw new Exception("Could not parse Bundle Reward Quantity");
         }
     }
