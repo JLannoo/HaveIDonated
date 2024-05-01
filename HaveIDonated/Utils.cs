@@ -43,7 +43,7 @@ public static class Utils {
 
         var displacement = new Vector2(-32-windowSize.X, 32);
 
-        var position = new Vector2(mousePosition.X + displacement.X, Math.Min(mousePosition.Y + displacement.Y, (Game1.viewport.Height * Game1.options.zoomLevel) - windowSize.Y));
+        var position = new Vector2(mousePosition.X + displacement.X, Math.Min(mousePosition.Y + displacement.Y, (Game1.uiViewport.Height) - windowSize.Y));
 
         // Draw window
         IClickableMenu.drawTextureBox(
