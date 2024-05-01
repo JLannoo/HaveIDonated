@@ -11,6 +11,7 @@ using StardewValley.Menus;
 namespace HaveIDonated;
 
 public class InventoryIcons : IDisposable {
+
     private readonly IModHelper _helper;
     private readonly List<BundleData> _bundles;
 
@@ -47,40 +48,28 @@ public class InventoryIcons : IDisposable {
         if (itemsDrawn.Value == null || bundlesDrawn.Value == null) return;
 
         foreach(var item in itemsDrawn.Value) {
-            var (bundlesDonatable, donatableToMuseum) = Utils.IsItemDonatable(item.Item1, _bundles);
+            DrawIconsForItem(spriteBatch, item);
+        }
 
-            if(bundlesDonatable.Count > 0) {
-                foreach(var bundle in bundlesDonatable) {
-                    var icon = Utils.GetBundleIcon(bundle.bundleColor);
-                    float scale = 1.5f;
+        foreach(var noteBundle in bundlesDrawn.Value) {
+            DrawIconsForBundle(spriteBatch, noteBundle);
+        }
+    }
 
-                    if (icon != null) {
-                        spriteBatch.Draw(
-                            icon.texture,
-                            new Vector2(item.Item2.bounds.Left, item.Item2.bounds.Top),
-                            icon.sourceRect,
-                            Color.White,
-                            0,
-                            Vector2.Zero,
-                            scale,
-                            SpriteEffects.None,
-                            1
-                        );
-                    }
-                }
-            }
+    public void DrawIconsForItem(SpriteBatch spriteBatch, (Item, ClickableComponent) item, float transparency = 1f) {
+        var (bundlesDonatable, donatableToMuseum) = Utils.IsItemDonatable(item.Item1, _bundles);
 
-            if (donatableToMuseum) {
-                var icon = Utils.GetNPCIconByName("Gunther");
+        if (bundlesDonatable.Count > 0) {
+            foreach (var bundle in bundlesDonatable) {
+                var icon = Utils.GetBundleIcon(bundle.bundleColor);
+                float scale = 1.5f;
 
                 if (icon != null) {
-                    float scale = 1f;
-
                     spriteBatch.Draw(
                         icon.texture,
-                        new Vector2(item.Item2.bounds.Right - icon.sourceRect.Width * scale, item.Item2.bounds.Top),
+                        new Vector2(item.Item2.bounds.Left, item.Item2.bounds.Top),
                         icon.sourceRect,
-                        Color.White,
+                        Color.White * transparency,
                         0,
                         Vector2.Zero,
                         scale,
@@ -91,31 +80,55 @@ public class InventoryIcons : IDisposable {
             }
         }
 
-        foreach(var noteBundle in bundlesDrawn.Value) {
-            string[] bundleItemIDs = noteBundle.ingredients.Select(item => item.id).ToArray();
-            ParsedItemData[] itemsInBundle = bundleItemIDs.Select(id => ItemRegistry.GetData(id)).ToArray();
-            
-            foreach(var inventoryItem in Game1.player.Items) {
-                if(inventoryItem != null && itemsInBundle.FirstOrDefault(i => i.DisplayName == inventoryItem.DisplayName) != null) {
-                    var icon = new ClickableTextureComponent(new Rectangle(1,1,200,200), Game1.mouseCursors, new Rectangle(401, 496, 9, 14), 4f);
-                    float scale = 2f + Utils.Oscillate(2000, 0.2f);
+        if (donatableToMuseum) {
+            var icon = Utils.GetNPCIconByName("Gunther");
 
-                    spriteBatch.Draw(
-                        icon.texture,
-                        new Vector2(
-                            noteBundle.bounds.Right - (icon.sourceRect.Width/2) * scale,
-                            (int)(noteBundle.bounds.Top - (icon.sourceRect.Height / 2) * scale)
-                        ),
-                        icon.sourceRect,
-                        Color.White,
-                        0,
-                        Vector2.Zero,
-                        scale,
-                        SpriteEffects.None,
-                        1
-                    );
+            if (icon != null) {
+                float scale = 1f;
 
-                }
+                spriteBatch.Draw(
+                    icon.texture,
+                    new Vector2(item.Item2.bounds.Right - icon.sourceRect.Width * scale, item.Item2.bounds.Top),
+                    icon.sourceRect,
+                    Color.White * transparency,
+                    0,
+                    Vector2.Zero,
+                    scale,
+                    SpriteEffects.None,
+                    1
+                );
+            }
+        }
+    }
+
+    public void DrawIconsForBundle(SpriteBatch spriteBatch, Bundle bundle) {
+        if (bundle.complete) return;
+
+        ParsedItemData[] itemsInBundle = bundle.ingredients
+            .Where(i => !i.completed)
+            .Select(i => ItemRegistry.GetData(i.id))
+            .ToArray();
+
+        foreach (var inventoryItem in Game1.player.Items) {
+            if (inventoryItem != null && itemsInBundle.FirstOrDefault(i => i.DisplayName == inventoryItem.DisplayName) != null) {
+                var icon = new ClickableTextureComponent(new Rectangle(1, 1, 200, 200), Game1.mouseCursors, new Rectangle(401, 496, 9, 14), 4f);
+                float scale = 2f + Utils.Oscillate(2000, 0.2f);
+
+                spriteBatch.Draw(
+                    icon.texture,
+                    new Vector2(
+                        bundle.bounds.Right - (icon.sourceRect.Width / 2) * scale,
+                        (int)(bundle.bounds.Top - (icon.sourceRect.Height / 2) * scale)
+                    ),
+                    icon.sourceRect,
+                    Color.White,
+                    0,
+                    Vector2.Zero,
+                    scale,
+                    SpriteEffects.None,
+                    1
+                );
+
             }
         }
     }

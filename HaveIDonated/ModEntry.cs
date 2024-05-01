@@ -52,7 +52,8 @@ public class ModEntry: Mod {
 
     private void InitializeHarmony() {
         HarmonyObject = new Harmony(ModManifest.UniqueID);
-        InventoryPatches.Initialize(Monitor, HarmonyObject);
+        ObjectPatches.Initialize(Monitor, HarmonyObject);
+        BundlePatches.Initialize(Monitor, HarmonyObject);
     }
     #endregion
 }
